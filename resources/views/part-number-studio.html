@@ -1,0 +1,1318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Part Number Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+
+<style>
+:root{
+  --paper:#EDF1EF; --surface:#FFFFFF; --surface-2:#F6F9F7; --surface-3:#E7EDEA;
+  --ink:#121A18; --ink-2:#33403D; --muted:#5F6D69;
+  --line:#D2DAD7; --line-2:#BAC6C2;
+  --accent:#0E7C66; --accent-2:#0A5B4B; --accent-soft:#DCEDE8; --on-accent:#FFFFFF;
+  --warn:#8E6410; --warn-soft:#F6EDD9;
+  --danger:#9E362C; --danger-soft:#F7E4E1;
+  --shadow:0 1px 1px rgba(18,26,24,.04), 0 10px 26px -16px rgba(18,26,24,.30);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0D1312; --surface:#151D1C; --surface-2:#1B2423; --surface-3:#222D2B;
+    --ink:#E3EAE8; --ink-2:#C2CDCA; --muted:#8B9B97;
+    --line:#2A3634; --line-2:#3A4844;
+    --accent:#43C2A3; --accent-2:#6FD8BD; --accent-soft:#123029; --on-accent:#06201A;
+    --warn:#D6A648; --warn-soft:#33290F;
+    --danger:#E08076; --danger-soft:#391C18;
+    --shadow:0 1px 1px rgba(0,0,0,.3), 0 12px 30px -18px rgba(0,0,0,.8);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0D1312; --surface:#151D1C; --surface-2:#1B2423; --surface-3:#222D2B;
+  --ink:#E3EAE8; --ink-2:#C2CDCA; --muted:#8B9B97;
+  --line:#2A3634; --line-2:#3A4844;
+  --accent:#43C2A3; --accent-2:#6FD8BD; --accent-soft:#123029; --on-accent:#06201A;
+  --warn:#D6A648; --warn-soft:#33290F;
+  --danger:#E08076; --danger-soft:#391C18;
+  --shadow:0 1px 1px rgba(0,0,0,.3), 0 12px 30px -18px rgba(0,0,0,.8);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+h1,h3{margin:0; text-wrap:balance; font-weight:600; line-height:1.25}
+p{margin:0}
+button,input,select,textarea{font:inherit; color:inherit}
+
+.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace; font-variant-numeric:tabular-nums}
+.lbl{
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif;
+  text-transform:uppercase; letter-spacing:.12em; font-size:11px; font-weight:600; color:var(--muted);
+}
+
+/* ---------- shell ---------- */
+.shell{max-width:1260px; margin:0 auto; padding:0 20px 72px}
+.topbar{
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  padding:18px 0 16px; border-bottom:1px solid var(--line); margin-bottom:24px;
+}
+.brand{display:flex; align-items:center; gap:10px; margin-right:auto}
+.brand .mark{
+  font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:12px; letter-spacing:.04em;
+  border:1px solid var(--line-2); padding:3px 7px; color:var(--accent);
+}
+.brand h1{font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif; font-size:19px; letter-spacing:.01em}
+.brand .sub{font-size:12.5px; color:var(--muted)}
+
+.vendorbox{display:flex; align-items:stretch; border:1px solid var(--line-2); background:var(--surface)}
+.vendorbox .cap{display:flex; align-items:center; padding:0 10px; border-right:1px solid var(--line); background:var(--surface-2)}
+.vendorbox select{border:0; background:transparent; padding:8px 10px; min-width:190px; outline:none}
+.vendorbox select:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
+
+.tabs{display:flex; gap:2px; flex-wrap:wrap; border-bottom:1px solid var(--line); margin:-24px 0 24px}
+.tab{
+  background:transparent; border:0; border-bottom:2px solid transparent;
+  padding:12px 14px 10px; cursor:pointer; color:var(--muted); font-weight:500; font-size:14px;
+}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--accent); font-weight:600}
+.tab:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.tab .count{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--muted); margin-left:6px}
+
+/* ---------- primitives ---------- */
+.card{background:var(--surface); border:1px solid var(--line); box-shadow:var(--shadow)}
+.card > .head{
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  padding:11px 14px; border-bottom:1px solid var(--line); background:var(--surface-2);
+}
+.card > .body{padding:14px}
+.stack{display:flex; flex-direction:column}
+.row{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.spacer{margin-left:auto}
+.gap8{gap:8px} .gap12{gap:12px} .gap16{gap:16px}
+
+.btn{
+  border:1px solid var(--line-2); background:var(--surface); color:var(--ink);
+  padding:7px 13px; cursor:pointer; font-size:13.5px; font-weight:500;
+  display:inline-flex; align-items:center; gap:7px; transition:background .12s, border-color .12s;
+}
+.btn:hover{background:var(--surface-3); border-color:var(--muted)}
+.btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.btn.pri{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+.btn.pri:hover{background:var(--accent-2); border-color:var(--accent-2)}
+.btn.sm{padding:4px 9px; font-size:12.5px}
+.btn.ico{padding:4px 8px; font-family:"IBM Plex Mono",monospace; line-height:1}
+.btn.dgr{color:var(--danger)}
+.btn.dgr:hover{background:var(--danger-soft); border-color:var(--danger)}
+.btn[disabled]{opacity:.4; cursor:not-allowed}
+.btn[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent-2)}
+
+.field{display:flex; flex-direction:column; gap:5px; min-width:0}
+input[type=text],input[type=number],select,textarea{
+  border:1px solid var(--line-2); background:var(--surface); padding:7px 9px; width:100%;
+  border-radius:0; outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
+textarea{resize:vertical; min-height:70px; line-height:1.5}
+
+.pill{
+  display:inline-flex; align-items:center; gap:6px; padding:2px 8px; font-size:11.5px; font-weight:600;
+  border:1px solid var(--line-2); background:var(--surface-2); color:var(--muted);
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif; letter-spacing:.06em; text-transform:uppercase;
+}
+.pill.ok{color:var(--accent); border-color:var(--accent); background:var(--accent-soft)}
+.pill.warn{color:var(--warn); border-color:var(--warn); background:var(--warn-soft)}
+.pill.bad{color:var(--danger); border-color:var(--danger); background:var(--surface)}
+.pill.flat{text-transform:none; letter-spacing:0; font-weight:500; font-family:"IBM Plex Sans",sans-serif}
+.rowmark{display:inline-block; width:3px; align-self:stretch}
+tr.r-none td{color:var(--muted)}
+.tally{display:flex; gap:18px; flex-wrap:wrap; align-items:baseline}
+.tally .n{font-family:"IBM Plex Mono",monospace; font-size:22px; font-weight:600; line-height:1}
+.tally .n.ok{color:var(--accent)} .tally .n.warn{color:var(--warn)} .tally .n.bad{color:var(--danger)} .tally .n.dim{color:var(--muted)}
+.tally .u{font-size:12.5px; color:var(--muted); margin-left:6px}
+
+.empty{padding:28px 14px; text-align:center; color:var(--muted); font-size:14px}
+.hint{font-size:12.5px; color:var(--muted); line-height:1.5}
+
+/* data table */
+.dtable input[type=text]{border-color:transparent; background:transparent; padding:5px 7px}
+.dtable input[type=text]:hover{border-color:var(--line)}
+.dtable input[type=text]:focus{border-color:var(--accent); background:var(--surface)}
+.dtable td{padding:3px 6px; vertical-align:middle}
+.dtable td.act{width:1%; white-space:nowrap; text-align:center}
+.dtable tr.off input[type=text]{color:var(--muted); text-decoration:line-through}
+.dtable .chk{width:auto; margin:0}
+.usedby{display:flex; flex-wrap:wrap; gap:6px}
+
+/* ---------- layout ---------- */
+.designer{display:grid; grid-template-columns:232px minmax(0,1fr) 336px; gap:20px; align-items:start}
+@media (max-width:1140px){ .designer{grid-template-columns:214px minmax(0,1fr)} .previewcol{grid-column:1/-1} }
+@media (max-width:760px){ .designer{grid-template-columns:1fr} .previewcol{position:static} }
+
+.tplitem{
+  display:block; width:100%; text-align:left; border:1px solid var(--line); border-left:3px solid transparent;
+  background:var(--surface); padding:9px 11px; cursor:pointer; margin-bottom:-1px;
+}
+.tplitem:hover{background:var(--surface-2)}
+.tplitem[aria-current="true"]{border-left-color:var(--accent); background:var(--surface-2)}
+.tplitem:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
+.tplitem .nm{font-weight:600; font-size:14px}
+.tplitem .cd{font-size:11.5px; color:var(--muted)}
+
+/* segment cards */
+.seg{border:1px solid var(--line); background:var(--surface); margin-bottom:-1px}
+.seg > .sh{display:flex; align-items:center; flex-wrap:wrap; gap:8px 10px; padding:8px 10px; background:var(--surface-2); border-bottom:1px solid var(--line)}
+.seg > .sb{padding:12px 10px; display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.seg .idx{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--muted); border:1px solid var(--line-2); padding:1px 5px}
+.seg .move{display:flex; gap:3px}
+.conn{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  border:1px solid var(--line); border-top-style:dashed; border-bottom-style:dashed;
+  background:var(--paper); padding:6px 10px; margin-bottom:-1px;
+}
+.conn .lbl{font-size:10px}
+.conn .chips{display:flex; gap:3px; flex-wrap:wrap}
+.conn .shown{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted); margin-left:auto}
+.conn .shown b{color:var(--accent); font-weight:600}
+
+/* preview */
+.previewcol{position:sticky; top:14px}
+.codebox{
+  padding:18px 14px; background:var(--surface-2); border-bottom:1px solid var(--line);
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:center;
+  min-height:76px; overflow-x:auto;
+}
+.tok{
+  font-family:"IBM Plex Mono",monospace; font-size:22px; font-weight:500; letter-spacing:.02em;
+  padding:3px 3px 6px; border-bottom:2px solid transparent; white-space:pre;
+}
+.tok.t-fixed{border-bottom-color:var(--line-2)}
+.tok.t-list{border-bottom-color:var(--accent)}
+.tok.t-serial{border-bottom-color:var(--warn)}
+.tok.t-date{border-bottom-color:var(--line-2); color:var(--ink-2)}
+.tok.t-free{border-bottom-color:var(--muted)}
+.tok.t-check{border-bottom-color:var(--danger)}
+.tok.sep{color:var(--muted); font-weight:400; border-bottom-color:transparent; padding-left:1px; padding-right:1px}
+
+table{width:100%; border-collapse:collapse; font-size:13px}
+th,td{text-align:left; padding:7px 9px; border-bottom:1px solid var(--line); vertical-align:top}
+th{
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif; text-transform:uppercase;
+  letter-spacing:.1em; font-size:10.5px; color:var(--muted); font-weight:600; white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:0}
+.scrollx{overflow-x:auto}
+td.mono{font-family:"IBM Plex Mono",monospace}
+
+.legend{display:flex; flex-wrap:wrap; gap:10px; padding:10px 14px; border-top:1px solid var(--line); font-size:11.5px; color:var(--muted)}
+.legend span{display:inline-flex; align-items:center; gap:5px}
+.legend i{width:14px; height:2px; display:inline-block}
+
+.sepchips{display:flex; gap:4px; margin-top:2px; flex-wrap:wrap}
+
+/* ---------- modal ---------- */
+.overlay{position:fixed; inset:0; z-index:60; background:rgba(10,16,15,.45); display:flex; align-items:center; justify-content:center; padding:20px}
+.overlay[hidden]{display:none}
+.modal{width:min(420px,100%); background:var(--surface); border:1px solid var(--line-2); box-shadow:var(--shadow)}
+.modal .mh{padding:12px 16px; border-bottom:1px solid var(--line); background:var(--surface-2)}
+.modal .mb{padding:16px; display:flex; flex-direction:column; gap:12px}
+.modal .mf{padding:12px 16px; border-top:1px solid var(--line); display:flex; gap:8px; justify-content:flex-end}
+
+.toast{
+  position:fixed; left:50%; transform:translateX(-50%); bottom:24px; z-index:70;
+  background:var(--ink); color:var(--paper); padding:9px 16px; font-size:13.5px;
+  box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:opacity .2s, transform .2s;
+}
+.toast.on{opacity:1; transform:translateX(-50%) translateY(-4px)}
+
+@media (prefers-reduced-motion: reduce){ *{transition-duration:.01ms !important; animation-duration:.01ms !important} }
+</style>
+
+</head>
+<body>
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <span class="mark">PN</span>
+      <div>
+        <h1>Part Number Studio</h1>
+        <div class="sub">Part number format designer for multiple companies</div>
+      </div>
+    </div>
+    <div class="vendorbox">
+      <span class="cap lbl">Company</span>
+      <select id="companySel" aria-label="Select company"></select>
+    </div>
+    <button class="btn sm" data-act="company-add">New</button>
+    <button class="btn sm" data-act="company-rename">Rename</button>
+    <button class="btn sm dgr" data-act="company-del">Delete</button>
+    <button class="btn sm" data-act="cfg-copy" title="Copy all companies and templates as JSON">Export</button>
+  </header>
+
+  <nav class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" data-tab="design">Templates</button>
+    <button class="tab" role="tab" data-tab="category">Project Category<span class="count" id="catCount"></span></button>
+    <button class="tab" role="tab" data-tab="import">Import &amp; Match</button>
+  </nav>
+
+  <main id="view"></main>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="mh"><h3 id="modalTitle"></h3><p class="hint" id="modalMsg"></p></div>
+    <div class="mb" id="modalBody"></div>
+    <div class="mf">
+      <button class="btn" id="modalCancel">Cancel</button>
+      <button class="btn pri" id="modalOk">OK</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* =====================================================================
+   Part Number Studio — multi-company part number format designer
+   Company -> Template -> Segment
+   Segment types: fixed | list | serial | date | free | check
+   Separators are limited to hyphen and underscore, repeatable ("-", "--", "__").
+   ===================================================================== */
+
+const STORE_KEY = "pn-studio-v4";
+const $  = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const uid = p => p + "_" + Math.random().toString(36).slice(2, 9);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => (
+  { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+/* ---------- separator rules ---------- */
+const SEP_MAX = 4;
+const SEP_PRESETS = ["-", "--", "_", "__"];
+const cleanSep = v => String(v == null ? "" : v).replace(/[^-_]/g, "").slice(0, SEP_MAX);
+const SEP_FALLBACK = "-";   /* every join carries at least one character */
+
+/* ---------- segment types ---------- */
+const TYPES = {
+  fixed:  { en: "Fixed text",     hint: "Always the same characters, such as a company prefix" },
+  list:   { en: "Pick list",      hint: "One of a defined set of codes, such as a product category" },
+  serial: { en: "Running number", hint: "Sequential number, issued automatically" },
+  date:   { en: "Date",           hint: "Taken from the date the number is issued" },
+  free:   { en: "Free text",      hint: "Typed in by the user within the rules you set" },
+  check:  { en: "Check digit",    hint: "Calculated from every character before it" }
+};
+const DATE_FMT = ["YYYY", "YY", "MM", "DD", "YYMM", "YYMMDD", "YYYYMM"];
+const CHARSETS = {
+  "A-Z0-9": { en: "Letters A–Z and digits", re: "[A-Z0-9]" },
+  "0-9":    { en: "Digits only",            re: "[0-9]" },
+  "A-Z":    { en: "Letters A–Z only",       re: "[A-Z]" }
+};
+const RESET_SCOPE = {
+  none:  "Never — one continuous series",
+  year:  "Restart every year",
+  month: "Restart every month",
+  group: "Restart per preceding segments"
+};
+
+/* ---------- seed data: three companies, deliberately different schemes ---------- */
+function seed() {
+  const c1 = {
+    id: uid("co"), name: "Thai Part Industries", code: "TPI",
+    categories: [
+      { id: uid("ct"), code: "MTR", name: "Motor", note: "Drive motors and sub-assemblies", active: true },
+      { id: uid("ct"), code: "BRG", name: "Bearing", note: "Ball and roller bearings", active: true },
+      { id: uid("ct"), code: "SHF", name: "Shaft", note: "Turned shafts and spindles", active: true },
+      { id: uid("ct"), code: "HSG", name: "Housing", note: "Cast and machined housings", active: true },
+      { id: uid("ct"), code: "GBX", name: "Gearbox", note: "Retired in 2024 — kept for old numbers", active: false }
+    ],
+    templates: [{
+      id: uid("tp"), name: "Finished goods", code: "FG", sep: "-",
+      note: "Meaningful number: category, product group, then a running number",
+      segments: [
+        { id: uid("sg"), label: "Category", type: "list", sep: null, cfg: { options: "FG | Finished goods\nSF | Semi-finished\nRM | Raw material" } },
+        { id: uid("sg"), label: "Product group", type: "list", sep: null, cfg: { source: "category" } },
+        { id: uid("sg"), label: "Sequence", type: "serial", sep: null, cfg: { len: 4, start: 1, step: 1, reset: "group" } }
+      ]
+    },
+    {
+      id: uid("tp"), name: "Raw materials", code: "RM", sep: "_",
+      note: "Underscores throughout, so a material number never reads like a finished part",
+      segments: [
+        { id: uid("sg"), label: "Prefix", type: "fixed", sep: null, cfg: { value: "RM" } },
+        { id: uid("sg"), label: "Material", type: "list", sep: null, cfg: { options: "STL | Steel\nALU | Aluminium\nBRS | Brass\nPLA | Plastic" } },
+        { id: uid("sg"), label: "Grade", type: "free", sep: null, cfg: { min: 3, max: 3, charset: "A-Z0-9" } },
+        { id: uid("sg"), label: "Sequence", type: "serial", sep: null, cfg: { len: 3, start: 1, step: 1, reset: "group" } }
+      ]
+    },
+    {
+      id: uid("tp"), name: "Spare part kits", code: "KIT", sep: "-",
+      note: "Reads from the same category table as finished goods, and closes with a check digit",
+      segments: [
+        { id: uid("sg"), label: "Prefix", type: "fixed", sep: null, cfg: { value: "KIT" } },
+        { id: uid("sg"), label: "Product group", type: "list", sep: null, cfg: { source: "category" } },
+        { id: uid("sg"), label: "Sequence", type: "serial", sep: null, cfg: { len: 3, start: 1, step: 1, reset: "group" } },
+        { id: uid("sg"), label: "Check digit", type: "check", sep: null, cfg: { mode: "mod36" } }
+      ]
+    }]
+  };
+  const c2 = {
+    id: uid("co"), name: "Siam Precision Co.", code: "SP",
+    categories: [
+      { id: uid("ct"), code: "CNC", name: "CNC mill", note: "3- and 5-axis milling", active: true },
+      { id: uid("ct"), code: "LTH", name: "Lathe", note: "Turning centres", active: true },
+      { id: uid("ct"), code: "PRS", name: "Press", note: "Stamping presses", active: true },
+      { id: uid("ct"), code: "EDM", name: "Wire EDM", note: "", active: true }
+    ],
+    templates: [
+      {
+        id: uid("tp"), name: "Drawing parts", code: "DWG", sep: "_",
+        note: "Carries the design year and month so drawings stay traceable",
+        segments: [
+          { id: uid("sg"), label: "Company code", type: "fixed", sep: null, cfg: { value: "SP" } },
+          { id: uid("sg"), label: "Year / month", type: "date", sep: null, cfg: { fmt: "YYMM" } },
+          { id: uid("sg"), label: "Sequence", type: "serial", sep: null, cfg: { len: 4, start: 1, step: 1, reset: "month" } },
+          { id: uid("sg"), label: "Revision", type: "free", sep: "-", cfg: { min: 1, max: 2, charset: "A-Z" } }
+        ]
+      },
+      {
+        id: uid("tp"), name: "Jigs and fixtures", code: "TOOL", sep: "-",
+        note: "Grouped by the machine the tool belongs to",
+        segments: [
+          { id: uid("sg"), label: "Type", type: "fixed", sep: null, cfg: { value: "T" } },
+          { id: uid("sg"), label: "Machine", type: "list", sep: null, cfg: { source: "category" } },
+          { id: uid("sg"), label: "Sequence", type: "serial", sep: null, cfg: { len: 3, start: 1, step: 1, reset: "group" } }
+        ]
+      }
+    ]
+  };
+  const c3 = {
+    id: uid("co"), name: "Northern Electronics", code: "NE",
+    categories: [],
+    templates: [{
+      id: uid("tp"), name: "Non-significant sequence", code: "SEQ", sep: "-",
+      note: "A plain running number closed by a check digit, so mistyped numbers are caught",
+      segments: [
+        { id: uid("sg"), label: "Prefix", type: "fixed", sep: null, cfg: { value: "NE" } },
+        { id: uid("sg"), label: "Sequence", type: "serial", sep: null, cfg: { len: 6, start: 100000, step: 1, reset: "none" } },
+        { id: uid("sg"), label: "Check digit", type: "check", sep: null, cfg: { mode: "mod10" } }
+      ]
+    },
+    {
+      id: uid("tp"), name: "Customer builds", code: "CUST", sep: "-",
+      note: "One counter per customer per day, so the date and the sequence read together",
+      segments: [
+        { id: uid("sg"), label: "Prefix", type: "fixed", sep: null, cfg: { value: "NE" } },
+        { id: uid("sg"), label: "Customer", type: "list", sep: null, cfg: { options: "ACM | Acme Robotics\nHLX | Helix Systems\nORB | Orbit Controls" } },
+        { id: uid("sg"), label: "Build date", type: "date", sep: null, cfg: { fmt: "YYMMDD" } },
+        { id: uid("sg"), label: "Sequence", type: "serial", sep: null, cfg: { len: 3, start: 1, step: 1, reset: "group" } }
+      ]
+    }]
+  };
+  return { companies: [c1, c2, c3], activeCo: c1.id, activeTp: c1.templates[0].id, tab: "design" };
+}
+
+/* ---------- persistence (per-viewer convenience only) ---------- */
+let DB;
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) {
+      const d = JSON.parse(raw);
+      if (d && Array.isArray(d.companies) && d.companies.length) {
+        d.companies.forEach(c => { if (!Array.isArray(c.categories)) c.categories = []; });
+        if (d.tab !== "category" && d.tab !== "import") d.tab = "design";
+        return d;
+      }
+    }
+  } catch (e) { /* storage unavailable — fall through to seed */ }
+  return seed();
+}
+function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(DB)); } catch (e) { /* ignore */ } }
+
+const co = () => DB.companies.find(c => c.id === DB.activeCo) || DB.companies[0];
+const tp = () => { const c = co(); return c.templates.find(t => t.id === DB.activeTp) || c.templates[0]; };
+
+/* ---------- helpers ---------- */
+function parseOptions(txt) {
+  return String(txt || "").split("\n").map(l => l.trim()).filter(Boolean).map(l => {
+    const i = l.indexOf("|");
+    return i < 0 ? { code: l, label: l } : { code: l.slice(0, i).trim(), label: l.slice(i + 1).trim() };
+  }).filter(o => o.code);
+}
+/* a pick list draws its codes either from the segment itself or from the company category table */
+function segOptions(s) {
+  const c = s.cfg || {};
+  if (c.source === "category") {
+    const cats = (co() || {}).categories || [];
+    return cats.filter(x => x.active !== false && x.code).map(x => ({ code: x.code, label: x.name || x.code }));
+  }
+  return parseOptions(c.options);
+}
+const usesCategory = () => co().templates.reduce((a, t) =>
+  a + t.segments.filter(x => x.type === "list" && (x.cfg || {}).source === "category").length, 0);
+
+const pad = (n, l) => String(Math.abs(Math.trunc(n))).padStart(l, "0").slice(-l);
+function dateStr(fmt, d) {
+  const Y = d.getFullYear(), M = pad(d.getMonth() + 1, 2), D = pad(d.getDate(), 2);
+  return fmt.replace("YYYY", String(Y)).replace("YY", String(Y).slice(-2)).replace("MM", M).replace("DD", D);
+}
+
+/* separator in front of a segment: per-segment override wins over the template default */
+function sepBefore(t, seg, i) {
+  if (i === 0) return "";
+  const own = cleanSep(seg.sep);
+  if (own) return own;                          /* per-join override */
+  return cleanSep(t.sep) || SEP_FALLBACK;       /* template default */
+}
+
+/* check digit: digits map to 0–9, letters A–Z map to 10–35 */
+const charVal = ch => { const c = ch.toUpperCase(); if (c >= "0" && c <= "9") return c.charCodeAt(0) - 48; if (c >= "A" && c <= "Z") return c.charCodeAt(0) - 55; return 0; };
+function checkDigit(str, mode) {
+  const s = String(str).replace(/[^0-9A-Za-z]/g, "");
+  if (mode === "mod36") {
+    let sum = 0; for (const ch of s) sum += charVal(ch);
+    const v = sum % 36; return v < 10 ? String(v) : String.fromCharCode(55 + v);
+  }
+  let sum = 0, w = 3;
+  for (let i = s.length - 1; i >= 0; i--) { sum += charVal(s[i]) * w; w = w === 3 ? 1 : 3; }
+  return String((10 - (sum % 10)) % 10);
+}
+
+/* fixed length of a segment, or null when it varies */
+function segLen(s) {
+  const c = s.cfg || {};
+  if (s.type === "fixed")  return String(c.value || "").length;
+  if (s.type === "list")   { const o = segOptions(s); if (!o.length) return 0; const L = o[0].code.length; return o.every(x => x.code.length === L) ? L : null; }
+  if (s.type === "serial") return Number(c.len) || 0;
+  if (s.type === "date")   return (c.fmt || "YYMM").length;
+  if (s.type === "free")   return Number(c.min) === Number(c.max) ? Number(c.max) || 0 : null;
+  if (s.type === "check")  return 1;
+  return null;
+}
+function segMask(s) {
+  const c = s.cfg || {};
+  if (s.type === "fixed")  return String(c.value || "");
+  if (s.type === "list")   { const L = segLen(s); return L ? "X".repeat(L) : "X…"; }
+  if (s.type === "serial") return "9".repeat(Number(c.len) || 0);
+  if (s.type === "date")   return (c.fmt || "YYMM");
+  if (s.type === "free")   { const L = segLen(s); return L ? "A".repeat(L) : "A…"; }
+  if (s.type === "check")  return "C";
+  return "?";
+}
+const qRe = t => String(t).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+function segRegex(s) {
+  const c = s.cfg || {};
+  if (s.type === "fixed")  return qRe(String(c.value || ""));
+  if (s.type === "list")   { const o = segOptions(s); return o.length ? "(?:" + o.map(x => qRe(x.code)).join("|") + ")" : ".*"; }
+  if (s.type === "serial") return "[0-9]{" + (Number(c.len) || 1) + "}";
+  if (s.type === "date")   return "[0-9]{" + (c.fmt || "YYMM").length + "}";
+  if (s.type === "free")   return (CHARSETS[c.charset] || CHARSETS["A-Z0-9"]).re + "{" + (Number(c.min) || 1) + "," + (Number(c.max) || 4) + "}";
+  if (s.type === "check")  return (c.mode === "mod36") ? "[0-9A-Z]" : "[0-9]";
+  return ".+";
+}
+function tplRegex(t, capture) {
+  let out = "";
+  t.segments.forEach((s, i) => {
+    out += qRe(sepBefore(t, s, i));
+    const r = segRegex(s);
+    out += capture ? "(" + r + ")" : (/^\(\?:/.test(r) ? r : "(?:" + r + ")");
+  });
+  return "^" + out + "$";
+}
+
+/* ---------------------------------------------------------------
+   Matching imported numbers back to the template that produced them
+   --------------------------------------------------------------- */
+
+/* How much literal structure a template pins down. Two templates can share a
+   shape — XX-XXX-XX-000 — but the one whose segments only accept a known set
+   of codes is the more specific claim, so it wins a tie on shape alone. */
+function specificity(t) {
+  return t.segments.reduce((a, s) => {
+    const L = segLen(s) || 1;
+    if (s.type === "fixed") return a + L * 3;
+    if (s.type === "list")  return a + L * 2;
+    if (s.type === "date")  return a + L;
+    if (s.type === "check") return a + 1;
+    return a;                              /* serial and free text pin down nothing */
+  }, 0);
+}
+
+function decodeWith(t, m) {
+  return t.segments.map((s, i) => {
+    const val = m[i + 1];
+    let note = "", bad = false;
+    if (s.type === "list") {
+      const o = segOptions(s).find(x => x.code === val);
+      note = o ? o.label : "not in the list";
+    } else if (s.type === "date") {
+      note = (s.cfg || {}).fmt || "YYMM";
+    } else if (s.type === "check") {
+      const before = t.segments.slice(0, i).map((_, j) => m[j + 1]).join("");
+      const exp = checkDigit(before, (s.cfg || {}).mode || "mod10");
+      if (exp === val) note = "valid"; else { note = "expected " + exp; bad = true; }
+    }
+    return { seg: s, val, note, bad };
+  });
+}
+
+function matchCode(c, raw) {
+  const code = String(raw).trim();
+  const hits = [];
+  c.templates.forEach(t => {
+    let re; try { re = new RegExp(tplRegex(t, true)); } catch (e) { return; }
+    const m = code.match(re); if (!m) return;
+    const decoded = decodeWith(t, m);
+    hits.push({ t, decoded, score: specificity(t), bad: decoded.some(d => d.bad) });
+  });
+  const clean = hits.filter(h => !h.bad).sort((a, b) => b.score - a.score);
+  if (clean.length) {
+    const tied = clean.filter(h => h.score === clean[0].score);
+    return { code, status: tied.length > 1 ? "ambiguous" : "matched", hit: clean[0], tied };
+  }
+  if (hits.length) {
+    hits.sort((a, b) => b.score - a.score);
+    return { code, status: "invalid", hit: hits[0], tied: [hits[0]] };
+  }
+  return { code, status: "none", hit: null, tied: [] };
+}
+
+/* Where each running number has to resume so an import does not collide with
+   the next number issued. */
+function seqSummary(results) {
+  const map = {};
+  results.forEach(r => {
+    if (r.status !== "matched" && r.status !== "ambiguous") return;
+    const t = r.hit.t, dec = r.hit.decoded;
+    dec.forEach((d, i) => {
+      if (d.seg.type !== "serial") return;
+      const reset = (d.seg.cfg || {}).reset || "none";
+      let scope = "one continuous series";
+      if (reset === "group") scope = dec.slice(0, i).map(x => x.val).join("") || "(nothing in front)";
+      else if (reset === "year" || reset === "month") {
+        const dseg = dec.slice(0, i).find(x => x.seg.type === "date");
+        scope = dseg ? dseg.val : "(no date in the number)";
+      }
+      const key = t.id + "|" + d.seg.id + "|" + scope;
+      const n = parseInt(d.val, 10);
+      if (isNaN(n)) return;
+      if (!map[key]) map[key] = { tpl: t.name, seg: d.seg.label, scope, max: n, len: d.val.length, step: Number((d.seg.cfg || {}).step) || 1, count: 1 };
+      else { map[key].max = Math.max(map[key].max, n); map[key].count++; }
+    });
+  });
+  return Object.values(map);
+}
+
+/* scope key for running-number counters */
+function scopeKey(seg, before, now) {
+  const r = (seg.cfg || {}).reset || "none";
+  if (r === "year")  return dateStr("YYYY", now);
+  if (r === "month") return dateStr("YYYYMM", now);
+  if (r === "group") return before.join("");
+  return "ALL";
+}
+
+/* build one code; counters live only inside this call, so nothing is consumed */
+function buildCode(t, counters, now) {
+  now = now || new Date();
+  const parts = [];
+  t.segments.forEach(s => {
+    const c = s.cfg || {}; let txt = "";
+    if (s.type === "fixed") txt = String(c.value || "");
+    else if (s.type === "list") { const o = segOptions(s); txt = o[0] ? o[0].code : ""; }
+    else if (s.type === "date") txt = dateStr(c.fmt || "YYMM", now);
+    else if (s.type === "free") txt = "A".repeat(Math.max(1, Number(c.min) || 1));
+    else if (s.type === "serial") {
+      const key = s.id + "|" + scopeKey(s, parts.map(p => p.text), now);
+      const cur = counters[key] != null ? counters[key] : (Number(c.start) || 1);
+      txt = pad(cur, Number(c.len) || 4);
+      counters[key] = cur + (Number(c.step) || 1);
+    }
+    else if (s.type === "check") txt = checkDigit(parts.map(p => p.text).join(""), c.mode || "mod10");
+    parts.push({ seg: s, text: txt });
+  });
+  let code = "";
+  parts.forEach((p, i) => { code += sepBefore(t, p.seg, i) + p.text; });
+  return { parts, code };
+}
+function sampleCodes(t, n) {
+  const counters = {}, out = [];
+  for (let i = 0; i < n; i++) out.push(buildCode(t, counters).code);
+  return out;
+}
+
+/* ---------- toast ---------- */
+let toastT;
+function toast(msg) {
+  const el = $("#toast"); el.textContent = msg; el.classList.add("on");
+  clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove("on"), 1900);
+}
+
+/* ---------- copy, with a fallback for frames that block the clipboard API ---------- */
+function copyText(txt, okMsg) {
+  const done = () => toast(okMsg || "Copied");
+  const fallback = () => {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = txt; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); done();
+    } catch (e) { toast("Could not copy — select the text and copy it manually"); }
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, fallback);
+  else fallback();
+}
+
+/* ---------- modal (sandboxed frames may block prompt/confirm) ---------- */
+let modalOk = null;
+function modal(opts) {
+  $("#modalTitle").textContent = opts.title || "";
+  $("#modalMsg").textContent = opts.message || "";
+  $("#modalMsg").style.display = opts.message ? "" : "none";
+  $("#modalBody").innerHTML = (opts.fields || []).map(f => `<label class="field"><span class="lbl">${esc(f.label)}</span>
+      ${f.multiline
+        ? `<textarea class="mono" rows="6" data-mk="${esc(f.key)}" placeholder="${esc(f.placeholder || "")}">${esc(f.value || "")}</textarea>`
+        : `<input type="text" data-mk="${esc(f.key)}" value="${esc(f.value || "")}" placeholder="${esc(f.placeholder || "")}">`}
+    </label>`).join("");
+  $("#modalBody").style.display = (opts.fields || []).length ? "" : "none";
+  const ok = $("#modalOk");
+  ok.textContent = opts.confirmText || "OK";
+  ok.classList.toggle("dgr", !!opts.danger);
+  modalOk = () => {
+    const out = {};
+    $$("#modalBody [data-mk]").forEach(i => out[i.dataset.mk] = i.value.trim());
+    closeModal(); opts.onOk(out);
+  };
+  $("#overlay").hidden = false;
+  const first = $("#modalBody input");
+  if (first) { first.focus(); first.select(); } else ok.focus();
+}
+function closeModal() { $("#overlay").hidden = true; modalOk = null; }
+$("#modalCancel").addEventListener("click", closeModal);
+$("#modalOk").addEventListener("click", () => modalOk && modalOk());
+$("#overlay").addEventListener("click", e => { if (e.target.id === "overlay") closeModal(); });
+document.addEventListener("keydown", e => {
+  if ($("#overlay").hidden) return;
+  if (e.key === "Escape") closeModal();
+  if (e.key === "Enter" && e.target.tagName === "INPUT" && modalOk) { e.preventDefault(); modalOk(); }
+  if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && modalOk) { e.preventDefault(); modalOk(); }
+});
+
+/* =====================================================================
+   Views
+   ===================================================================== */
+function render() {
+  const c = co(), t = tp();
+  $("#companySel").innerHTML = DB.companies.map(x =>
+    `<option value="${esc(x.id)}"${x.id === c.id ? " selected" : ""}>${esc(x.name)}</option>`).join("");
+  $$("#tabs .tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === DB.tab)));
+  $("#catCount").textContent = c.categories.length ? c.categories.length : "";
+
+  if (DB.tab === "category") { $("#view").innerHTML = viewCategories(c); save(); return; }
+  if (DB.tab === "import")   { $("#view").innerHTML = viewImport(c); save(); return; }
+
+  const list = c.templates.map(x => `
+    <button class="tplitem" data-act="tpl-pick" data-id="${esc(x.id)}" aria-current="${x.id === (t && t.id)}">
+      <div class="nm">${esc(x.name)}</div>
+      <div class="cd mono">${x.code ? esc(x.code) + " · " : ""}${x.segments.length} segments</div>
+    </button>`).join("");
+
+  $("#view").innerHTML = `
+  <div class="designer">
+    <section class="stack gap12">
+      <div class="lbl">Templates — ${esc(c.name)}</div>
+      <div>${list || '<div class="hint">No templates yet</div>'}</div>
+      <button class="btn sm" data-act="tpl-add">+ New template</button>
+      <p class="hint">A company can hold as many templates as it needs — production parts, raw materials and tooling often each want their own.</p>
+    </section>
+    <section class="stack gap16">
+      ${t ? templateEditor(t) : '<div class="card"><div class="empty">Create a template to start designing</div></div>'}
+    </section>
+    <aside class="previewcol">${t ? previewPanel(t) : ""}</aside>
+  </div>`;
+  save();
+}
+
+function viewCategories(c) {
+  const rows = c.categories.map(r => `
+    <tr class="${r.active === false ? "off" : ""}">
+      <td style="width:130px"><input type="text" class="mono" data-bind="cat.code" data-id="${esc(r.id)}" value="${esc(r.code)}" aria-label="Code" placeholder="CODE"></td>
+      <td style="width:26%"><input type="text" data-bind="cat.name" data-id="${esc(r.id)}" value="${esc(r.name || "")}" aria-label="Name" placeholder="Name"></td>
+      <td><input type="text" data-bind="cat.note" data-id="${esc(r.id)}" value="${esc(r.note || "")}" aria-label="Description" placeholder="Description"></td>
+      <td class="act"><input type="checkbox" class="chk" data-act="cat-active" data-id="${esc(r.id)}"${r.active === false ? "" : " checked"} aria-label="Active"></td>
+      <td class="act"><button class="btn sm ico dgr" data-act="cat-del" data-id="${esc(r.id)}" aria-label="Remove row">✕</button></td>
+    </tr>`).join("");
+
+  const mapped = [];
+  c.templates.forEach(t => t.segments.forEach(sg => {
+    if (sg.type === "list" && (sg.cfg || {}).source === "category") mapped.push({ t, sg });
+  }));
+
+  const dupes = {};
+  c.categories.forEach(r => { const k = (r.code || "").toUpperCase(); if (k) dupes[k] = (dupes[k] || 0) + 1; });
+  const clash = Object.keys(dupes).filter(k => dupes[k] > 1);
+  const blank = c.categories.filter(r => !r.code).length;
+
+  return `
+  <div class="stack gap16">
+    <div class="card">
+      <div class="head">
+        <span class="lbl">Project categories — ${esc(c.name)}</span>
+        <span class="hint">${c.categories.length} entries · ${c.categories.filter(r => r.active !== false && r.code).length} active</span>
+        <div class="spacer"></div>
+        <button class="btn sm" data-act="cat-paste">Paste rows</button>
+        <button class="btn sm pri" data-act="cat-add">+ Add row</button>
+      </div>
+      <div class="scrollx"><table class="dtable">
+        <thead><tr><th>Code</th><th>Name</th><th>Description</th><th>Active</th><th></th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="5" class="empty">No categories yet — add a row, or paste them in from a spreadsheet</td></tr>'}</tbody>
+      </table></div>
+      ${(clash.length || blank) ? `<div class="body" style="padding-top:0"><div class="row gap8">
+        ${clash.length ? `<span class="pill warn">duplicate code ${esc(clash.join(", "))}</span>` : ""}
+        ${blank ? `<span class="pill warn">${blank} row${blank > 1 ? "s" : ""} without a code</span>` : ""}
+        <span class="hint">Rows without a code, and inactive rows, are left out of the pick lists.</span>
+      </div></div>` : ""}
+    </div>
+
+    <div class="card">
+      <div class="head"><span class="lbl">Where this table is used</span>
+        <div class="spacer"></div><span class="hint">${mapped.length} segment${mapped.length === 1 ? "" : "s"}</span></div>
+      <div class="body stack gap12">
+        ${mapped.length ? `<div class="usedby">${mapped.map(x =>
+          `<button class="btn sm" data-act="goto-seg" data-id="${esc(x.t.id)}">${esc(x.t.name)} → ${esc(x.sg.label)}</button>`).join("")}</div>`
+          : '<p class="hint">No segment reads from this table yet. Open a template, pick a <strong>Pick list</strong> segment, and set its source to <strong>Project Category</strong>.</p>'}
+        <p class="hint">Codes here feed every mapped segment at once — rename a category and every template that maps to it follows. Codes already stamped on existing parts do not change, so retire a code by switching it off rather than deleting the row.</p>
+      </div>
+    </div>
+  </div>`;
+}
+
+let importText = "";
+function viewImport(c) {
+  const lines = importText.split(/[\n,;]/).map(x => x.trim().replace(/^["']|["']$/g, "")).filter(Boolean);
+  const results = lines.map(l => matchCode(c, l));
+  const n = k => results.filter(r => r.status === k).length;
+  const seq = seqSummary(results);
+
+  const byTpl = {};
+  results.forEach(r => { if (r.hit && r.status !== "none") byTpl[r.hit.t.name] = (byTpl[r.hit.t.name] || 0) + 1; });
+
+  const rows = results.map(r => {
+    const badge = r.status === "matched"   ? '<span class="pill ok">matched</span>'
+                : r.status === "ambiguous" ? '<span class="pill warn">ambiguous</span>'
+                : r.status === "invalid"   ? '<span class="pill bad">check digit</span>'
+                :                            '<span class="pill">no match</span>';
+    let tplCell = "—", detail = '<span class="hint">Matches none of the templates in this company</span>';
+    if (r.hit) {
+      tplCell = r.status === "ambiguous"
+        ? r.tied.map(h => esc(h.t.name)).join('<br>')
+        : esc(r.hit.t.name);
+      detail = r.decodedHtml || r.hit.decoded.map(d =>
+        `<span class="pill flat${d.bad ? " bad" : ""}">${esc(d.seg.label)}: <span class="mono">${esc(d.val)}</span>${d.note ? ' <span style="color:var(--muted)">· ' + esc(d.note) + '</span>' : ""}</span>`).join(" ");
+      if (r.status === "ambiguous") detail = '<span class="hint">Both templates accept this number — the shapes overlap. ' + detail + '</span>';
+    }
+    return `<tr class="r-${r.status}">
+      <td class="mono" style="white-space:nowrap; font-weight:600">${esc(r.code)}</td>
+      <td>${badge}</td>
+      <td>${tplCell}</td>
+      <td><div class="row" style="gap:5px">${detail}</div></td>
+    </tr>`;
+  }).join("");
+
+  return `
+  <div class="stack gap16">
+    <div class="card">
+      <div class="head"><span class="lbl">Import part numbers</span>
+        <div class="spacer"></div>
+        <span class="hint">Matched against all ${c.templates.length} templates of ${esc(c.name)}</span></div>
+      <div class="body stack gap12">
+        <label class="field"><span class="lbl">Paste the numbers — one per line, or separated by commas</span>
+          <textarea class="mono" id="impBox" rows="6" placeholder="AB-ABC-AB-0001&#10;AB-ABC-AB-0002&#10;XA-ABC-AB-0003">${esc(importText)}</textarea></label>
+        <div class="row gap8">
+          <button class="btn pri" data-act="imp-run">Match</button>
+          <button class="btn" data-act="imp-sample">Load sample numbers</button>
+          <button class="btn" data-act="imp-clear">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    ${lines.length ? `
+    <div class="card">
+      <div class="head"><span class="lbl">Result</span><div class="spacer"></div>
+        <span class="hint">${Object.entries(byTpl).map(([k, v]) => esc(k) + " · " + v).join("  |  ") || "nothing identified"}</span></div>
+      <div class="body">
+        <div class="tally">
+          <div><span class="n ok">${n("matched")}</span><span class="u">matched</span></div>
+          <div><span class="n warn">${n("ambiguous")}</span><span class="u">ambiguous</span></div>
+          <div><span class="n bad">${n("invalid")}</span><span class="u">check digit wrong</span></div>
+          <div><span class="n dim">${n("none")}</span><span class="u">no match</span></div>
+        </div>
+      </div>
+      <div class="scrollx"><table>
+        <thead><tr><th>Number</th><th>Result</th><th>Template</th><th>Decoded</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+    </div>` : ""}
+
+    ${seq.length ? `
+    <div class="card">
+      <div class="head"><span class="lbl">Where the running numbers have to resume</span>
+        <div class="spacer"></div><span class="hint">${seq.length} counter${seq.length === 1 ? "" : "s"} touched</span></div>
+      <div class="scrollx"><table>
+        <thead><tr><th>Template</th><th>Segment</th><th>Counter for</th><th>Imported</th><th>Highest seen</th><th>Next must be</th></tr></thead>
+        <tbody>${seq.map(x => `<tr>
+          <td>${esc(x.tpl)}</td>
+          <td>${esc(x.seg)}</td>
+          <td class="mono">${esc(x.scope)}</td>
+          <td class="mono">${x.count}</td>
+          <td class="mono">${esc(pad(x.max, x.len))}</td>
+          <td class="mono" style="font-weight:600">${esc(pad(x.max + x.step, x.len))}</td>
+        </tr>`).join("")}</tbody>
+      </table></div>
+      <div class="body" style="padding-top:12px">
+        <p class="hint">Importing existing numbers without moving the counters is how a system issues a number that is already on a shelf. Each row above is one counter that has to be set before the first new number is issued.</p>
+      </div>
+    </div>` : ""}
+  </div>`;
+}
+
+function templateEditor(t) {
+  const chips = SEP_PRESETS.map(v => {
+    const on = (cleanSep(t.sep) || SEP_FALLBACK) === v;
+    return `<button class="btn sm ico" data-act="sep-set" data-sep="${esc(v)}" aria-pressed="${on}"
+      title="Use ${esc(v)}">${esc(v)}</button>`;
+  }).join("");
+
+  return `
+  <div class="card">
+    <div class="head">
+      <span class="lbl">Template settings</span>
+      <div class="spacer"></div>
+      <button class="btn sm" data-act="tpl-dup">Duplicate</button>
+      <button class="btn sm dgr" data-act="tpl-del">Delete</button>
+    </div>
+    <div class="body stack gap12">
+      <div class="seg-grid" style="display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
+        <label class="field"><span class="lbl">Template name</span>
+          <input type="text" data-bind="tpl.name" value="${esc(t.name)}"></label>
+        <label class="field"><span class="lbl">Template code <span style="text-transform:none; letter-spacing:0">(optional)</span></span>
+          <input type="text" class="mono" data-bind="tpl.code" value="${esc(t.code || "")}" placeholder="none">
+          <span class="hint">Shorthand for this template in the list on the left. It is a label, not part of the number.</span></label>
+        <div class="field"><span class="lbl">Default separator</span>
+          <input type="text" class="mono" data-bind="tpl.sep" maxlength="${SEP_MAX}"
+                 value="${esc(cleanSep(t.sep) || SEP_FALLBACK)}" placeholder="-" aria-describedby="sepHelp">
+          <div class="sepchips">${chips}</div>
+        </div>
+      </div>
+      <p class="hint" id="sepHelp">Separators use hyphen and underscore only. Repeat a character for a wider gap — <span class="mono">-</span>, <span class="mono">--</span>, <span class="mono">_</span>, <span class="mono">__</span>. Every join below starts from this default and can override it, so one number can mix them — <span class="mono">A-123_A</span>.</p>
+      <label class="field"><span class="lbl">Description</span>
+        <input type="text" data-bind="tpl.note" value="${esc(t.note || "")}" placeholder="What this template is used for"></label>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="head">
+      <span class="lbl">Code structure</span>
+      <span class="hint">${t.segments.length} segments · left to right · this is what the number is made of</span>
+      <div class="spacer"></div>
+      <button class="btn sm pri" data-act="seg-add">+ Add segment</button>
+    </div>
+    <div class="body">
+      ${t.segments.map((s, i) => (i > 0 ? connRow(s, i, t) : "") + segCard(s, i, t)).join("")
+        || '<div class="empty">No segments yet — add one to start</div>'}
+    </div>
+  </div>`;
+}
+
+function connRow(s, i, t) {
+  const cur = cleanSep(s.sep);
+  const inherit = !cur;
+  const dflt = cleanSep(t.sep) || SEP_FALLBACK;
+  const chip = (val, label, on) =>
+    `<button class="btn sm ico" data-act="conn-set" data-id="${esc(s.id)}" data-sep="${esc(val)}" aria-pressed="${on}">${label}</button>`;
+  const chips = [
+    chip("@inherit", "default (" + esc(dflt) + ")", inherit),
+    ...SEP_PRESETS.map(v => chip(v, esc(v), !inherit && cur === v))
+  ].join("");
+  const prev = t.segments[i - 1];
+  const shown = sepBefore(t, s, i);
+  return `<div class="conn" data-conn="${esc(s.id)}">
+    <span class="lbl">Between ${esc(prev.label)} and ${esc(s.label)}</span>
+    <div class="chips">${chips}</div>
+    <span class="shown">…${esc(segMask(prev)).slice(-3)}<b>${shown ? esc(shown) : "·"}</b>${esc(segMask(s)).slice(0, 3)}…</span>
+  </div>`;
+}
+
+function segCard(s, i, t) {
+  const c = s.cfg || {};
+  let body = "";
+  if (s.type === "fixed") {
+    body = `<label class="field"><span class="lbl">Text</span>
+      <input type="text" class="mono" data-bind="seg.cfg.value" data-id="${esc(s.id)}" value="${esc(c.value || "")}"></label>`;
+  } else if (s.type === "list") {
+    const fromCat = c.source === "category";
+    const opts = segOptions(s);
+    const src = `<label class="field"><span class="lbl">Options come from</span>
+      <select data-bind="seg.cfg.source" data-id="${esc(s.id)}" data-rerender="1">
+        <option value="custom"${fromCat ? "" : " selected"}>This segment only</option>
+        <option value="category"${fromCat ? " selected" : ""}>Project Category</option>
+      </select></label>`;
+    const detail = fromCat
+      ? `<div class="field" style="grid-column:2/-1">
+          <span class="lbl">${opts.length} active categor${opts.length === 1 ? "y" : "ies"}</span>
+          <div class="row gap8" style="gap:5px">
+            ${opts.length
+              ? opts.slice(0, 12).map(o => `<span class="pill" style="text-transform:none" title="${esc(o.label)}"><span class="mono">${esc(o.code)}</span></span>`).join("")
+                + (opts.length > 12 ? `<span class="hint">+${opts.length - 12} more</span>` : "")
+              : '<span class="pill warn">table is empty</span>'}
+          </div>
+          <button class="btn sm" data-act="tab" data-tab="category" style="align-self:start; margin-top:4px">Edit Project Category</button>
+        </div>`
+      : `<label class="field" style="grid-column:2/-1"><span class="lbl">Options — one per line, written as  CODE | description</span>
+          <textarea class="mono" rows="4" data-bind="seg.cfg.options" data-id="${esc(s.id)}">${esc(c.options || "")}</textarea>
+          <span class="hint">${opts.length} options</span></label>`;
+    body = src + detail;
+  } else if (s.type === "serial") {
+    body = `
+      <label class="field"><span class="lbl">Digits</span><input type="number" min="1" max="12" data-bind="seg.cfg.len" data-id="${esc(s.id)}" value="${Number(c.len) || 4}"></label>
+      <label class="field"><span class="lbl">Start at</span><input type="number" min="0" data-bind="seg.cfg.start" data-id="${esc(s.id)}" value="${Number(c.start) || 1}"></label>
+      <label class="field"><span class="lbl">Step</span><input type="number" min="1" data-bind="seg.cfg.step" data-id="${esc(s.id)}" value="${Number(c.step) || 1}"></label>
+      <label class="field"><span class="lbl">Restart</span><select data-bind="seg.cfg.reset" data-id="${esc(s.id)}" data-rerender="1">
+        ${Object.entries(RESET_SCOPE).map(([k, v]) => `<option value="${k}"${(c.reset || "none") === k ? " selected" : ""}>${esc(v)}</option>`).join("")}
+      </select></label>`;
+  } else if (s.type === "date") {
+    body = `<label class="field"><span class="lbl">Format</span><select data-bind="seg.cfg.fmt" data-id="${esc(s.id)}" data-rerender="1">
+        ${DATE_FMT.map(f => `<option value="${f}"${(c.fmt || "YYMM") === f ? " selected" : ""}>${f}</option>`).join("")}
+      </select><span class="hint">Today: <span class="mono">${esc(dateStr(c.fmt || "YYMM", new Date()))}</span></span></label>`;
+  } else if (s.type === "free") {
+    body = `
+      <label class="field"><span class="lbl">Min length</span><input type="number" min="1" max="12" data-bind="seg.cfg.min" data-id="${esc(s.id)}" value="${Number(c.min) || 1}"></label>
+      <label class="field"><span class="lbl">Max length</span><input type="number" min="1" max="12" data-bind="seg.cfg.max" data-id="${esc(s.id)}" value="${Number(c.max) || 3}"></label>
+      <label class="field"><span class="lbl">Allowed characters</span><select data-bind="seg.cfg.charset" data-id="${esc(s.id)}" data-rerender="1">
+        ${Object.entries(CHARSETS).map(([k, v]) => `<option value="${k}"${(c.charset || "A-Z0-9") === k ? " selected" : ""}>${esc(v.en)}</option>`).join("")}
+      </select></label>`;
+  } else if (s.type === "check") {
+    body = `<label class="field"><span class="lbl">Method</span><select data-bind="seg.cfg.mode" data-id="${esc(s.id)}" data-rerender="1">
+        <option value="mod10"${(c.mode || "mod10") === "mod10" ? " selected" : ""}>Modulo 10 — result 0–9</option>
+        <option value="mod36"${c.mode === "mod36" ? " selected" : ""}>Modulo 36 — result 0–9, A–Z</option>
+      </select></label>`;
+  }
+
+  return `
+  <div class="seg">
+    <div class="sh">
+      <span class="idx">${pad(i + 1, 2)}</span>
+      <input type="text" data-bind="seg.label" data-id="${esc(s.id)}" value="${esc(s.label)}" aria-label="Segment name" style="max-width:140px; min-width:100px; font-weight:600">
+      <select data-bind="seg.type" data-id="${esc(s.id)}" data-rerender="1" aria-label="Segment type" style="max-width:136px; min-width:116px">
+        ${Object.entries(TYPES).map(([k, v]) => `<option value="${k}"${s.type === k ? " selected" : ""}>${esc(v.en)}</option>`).join("")}
+      </select>
+      <div class="spacer"></div>
+      <div class="move">
+        <button class="btn sm ico" data-act="seg-up" data-id="${esc(s.id)}" aria-label="Move up"${i === 0 ? " disabled" : ""}>↑</button>
+        <button class="btn sm ico" data-act="seg-down" data-id="${esc(s.id)}" aria-label="Move down"${i === t.segments.length - 1 ? " disabled" : ""}>↓</button>
+        <button class="btn sm ico dgr" data-act="seg-del" data-id="${esc(s.id)}" aria-label="Remove segment">✕</button>
+      </div>
+    </div>
+    <div class="sb">${body}<div class="hint" style="align-self:end">${esc(TYPES[s.type].hint)}</div></div>
+  </div>`;
+}
+
+function previewPanel(t) {
+  const built = buildCode(t, {});
+  const toks = [];
+  built.parts.forEach((p, i) => {
+    const sp = sepBefore(t, p.seg, i);
+    if (sp) toks.push(`<span class="tok sep">${esc(sp)}</span>`);
+    toks.push(`<span class="tok t-${p.seg.type}" title="${esc(p.seg.label)}">${esc(p.text || "·")}</span>`);
+  });
+  const mask = t.segments.map((s, i) => sepBefore(t, s, i) + segMask(s)).join("");
+  const lens = t.segments.map(segLen);
+  const sepLen = t.segments.reduce((a, s, i) => a + sepBefore(t, s, i).length, 0);
+  const fixedLen = lens.every(l => l !== null) ? lens.reduce((a, b) => a + b, 0) + sepLen : null;
+  const rows = t.segments.map((s, i) => `
+    <tr>
+      <td class="mono">${pad(i + 1, 2)}</td>
+      <td>${esc(s.label)}<div class="hint">${esc(TYPES[s.type].en)}</div></td>
+      <td class="mono">${esc(segMask(s))}</td>
+      <td class="mono">${segLen(s) === null ? "varies" : segLen(s)}</td>
+    </tr>`).join("");
+
+  return `
+  <div class="card">
+    <div class="head"><span class="lbl">Preview</span><div class="spacer"></div>
+      <button class="btn sm" data-act="copy" data-text="${esc(built.code)}">Copy</button></div>
+    <div class="codebox">${toks.join("") || '<span class="hint">No segments yet</span>'}</div>
+    <div class="legend">
+      <span><i style="background:var(--line-2)"></i>Fixed / date</span>
+      <span><i style="background:var(--accent)"></i>Pick list</span>
+      <span><i style="background:var(--warn)"></i>Running number</span>
+      <span><i style="background:var(--muted)"></i>Free text</span>
+      <span><i style="background:var(--danger)"></i>Check digit</span>
+    </div>
+    <div class="body stack gap12">
+      <div class="row gap8">
+        <span class="pill">Pattern <span class="mono" style="text-transform:none">${esc(mask)}</span></span>
+        <span class="pill${fixedLen === null ? " warn" : " ok"}">${fixedLen === null ? "variable length" : fixedLen + " characters"}</span>
+      </div>
+      <div class="scrollx"><table>
+        <thead><tr><th>#</th><th>Segment</th><th>Format</th><th>Digits</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="4" class="hint">—</td></tr>'}</tbody>
+      </table></div>
+      <div class="stack" style="gap:4px">
+        <span class="lbl">Next four numbers</span>
+        <div class="mono" style="font-size:13px; color:var(--ink-2)">${sampleCodes(t, 4).map(esc).join("<br>")}</div>
+      </div>
+      <div class="stack" style="gap:4px">
+        <span class="lbl">Matching pattern (regex)</span>
+        <div class="mono" style="font-size:11.5px; word-break:break-all; color:var(--muted)">${esc(tplRegex(t))}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* =====================================================================
+   Events
+   ===================================================================== */
+function defaultCfg(type) {
+  return type === "fixed" ? { value: "AB" }
+    : type === "list" ? { options: "A | Option A\nB | Option B" }
+    : type === "serial" ? { len: 4, start: 1, step: 1, reset: "none" }
+    : type === "date" ? { fmt: "YYMM" }
+    : type === "free" ? { min: 1, max: 2, charset: "A-Z0-9" }
+    : { mode: "mod10" };
+}
+function newTemplate(name, code) {
+  return {
+    id: uid("tp"), name, code: code || "TPL", sep: "-", note: "",
+    segments: [
+      { id: uid("sg"), label: "Prefix", type: "fixed", sep: null, cfg: { value: (code || "PN").slice(0, 3) } },
+      { id: uid("sg"), label: "Sequence", type: "serial", sep: null, cfg: { len: 4, start: 1, step: 1, reset: "none" } }
+    ]
+  };
+}
+
+function setBind(path, id, value, rerender) {
+  if (path.startsWith("cat.")) {
+    const row = co().categories.find(x => x.id === id);
+    if (row) row[path.slice(4)] = path === "cat.code" ? value.toUpperCase() : value;
+    save(); return;
+  }
+  const t = tp();
+  if (path === "tpl.sep") t.sep = cleanSep(value);
+  else if (path.startsWith("tpl.")) t[path.slice(4)] = value;
+  else {
+    const s = t.segments.find(x => x.id === id); if (!s) return;
+    if (path === "seg.label") s.label = value;
+    else if (path === "seg.sep") { s.sep = cleanSep(value); delete s.join; }
+    else if (path === "seg.type") { s.type = value; s.cfg = defaultCfg(value); }
+    else {
+      s.cfg = s.cfg || {};
+      /* leaving the shared table keeps a copy of its codes, so the segment never empties out */
+      if (path === "seg.cfg.source" && value === "custom" && !String(s.cfg.options || "").trim()) {
+        s.cfg.options = segOptions(s).map(o => o.code + " | " + o.label).join("\n");
+      }
+      s.cfg[path.split(".").pop()] = value;
+    }
+  }
+  save();
+  if (rerender) render(); else refreshPreview();
+}
+
+function refreshPreview() {
+  const t = tp(); if (!t) return;
+  const host = $(".previewcol");
+  if (host) host.innerHTML = previewPanel(t);
+  $$("[data-conn]").forEach(el => {
+    const i = t.segments.findIndex(x => x.id === el.dataset.conn);
+    if (i > 0) el.outerHTML = connRow(t.segments[i], i, t);
+  });
+  $$("[data-act='sep-set']").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.sep === (cleanSep(t.sep) || SEP_FALLBACK))));
+  const item = $('.tplitem[data-id="' + t.id + '"]');
+  if (item) {
+    $(".nm", item).textContent = t.name;
+    $(".cd", item).textContent = (t.code ? t.code + " · " : "") + t.segments.length + " segments";
+  }
+}
+
+document.addEventListener("input", e => {
+  const el = e.target;
+  if (el.id === "impBox") { importText = el.value; return; }
+  if (!el.dataset.bind) return;
+  /* separators accept hyphen and underscore only — strip anything else as it is typed */
+  if (el.dataset.bind === "tpl.sep" || el.dataset.bind === "seg.sep") {
+    const cleaned = cleanSep(el.value);
+    if (cleaned !== el.value) el.value = cleaned;
+  }
+  if (el.dataset.bind === "cat.code" && el.value !== el.value.toUpperCase()) {
+    const pos = el.selectionStart; el.value = el.value.toUpperCase();
+    try { el.setSelectionRange(pos, pos); } catch (err) { /* ignore */ }
+  }
+  setBind(el.dataset.bind, el.dataset.id, el.value, false);
+});
+
+document.addEventListener("change", e => {
+  const el = e.target;
+  if (el.dataset.bind === "tpl.sep" && !cleanSep(el.value)) {
+    el.value = SEP_FALLBACK; setBind("tpl.sep", null, SEP_FALLBACK, false); return;
+  }
+  if (el.dataset.bind && el.dataset.rerender) { setBind(el.dataset.bind, el.dataset.id, el.value, true); return; }
+  if (el.id === "impBox") { importText = el.value; return; }
+  if (el.id === "companySel") { DB.activeCo = el.value; DB.activeTp = (co().templates[0] || {}).id; render(); return; }
+  if (el.dataset.act === "cat-active") {
+    const row = co().categories.find(x => x.id === el.dataset.id);
+    if (row) { row.active = el.checked; render(); }
+    return;
+  }
+
+});
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const act = b.dataset.act, id = b.dataset.id;
+  const c = co(), t = tp();
+
+  if (act === "copy") { copyText(b.dataset.text || ""); return; }
+  if (act === "tab") { DB.tab = b.dataset.tab; render(); return; }
+  if (act === "goto-seg") { DB.tab = "design"; DB.activeTp = id; render(); return; }
+
+  if (act === "imp-run")   { const b2 = $("#impBox"); if (b2) importText = b2.value; render(); return; }
+  if (act === "imp-clear") { importText = ""; render(); return; }
+  if (act === "imp-sample") {
+    const out = [];
+    c.templates.forEach(t => sampleCodes(t, 2).forEach(x => out.push(x)));
+    out.push("ZZ-ZZZ-9999");
+    importText = out.join("\n"); render(); return;
+  }
+  if (act === "cat-add") {
+    c.categories.push({ id: uid("ct"), code: "", name: "", note: "", active: true });
+    render();
+    const rows = $$('[data-bind="cat.code"]'); const last = rows[rows.length - 1];
+    if (last) last.focus();
+    return;
+  }
+  if (act === "cat-del") {
+    const row = c.categories.find(x => x.id === id); if (!row) return;
+    const used = usesCategory();
+    const drop = () => { c.categories = c.categories.filter(x => x.id !== id); render(); };
+    if (!row.code || !used) return drop();
+    modal({
+      title: "Remove category", danger: true, confirmText: "Remove",
+      message: row.code + " feeds " + used + " pick-list segment" + (used === 1 ? "" : "s") +
+               ". Numbers already issued with it stay as they are, but the code can no longer be chosen. Switching the row off instead keeps it on record.",
+      onOk: drop
+    });
+    return;
+  }
+  if (act === "cat-paste") {
+    modal({
+      title: "Paste rows", confirmText: "Add",
+      message: "One category per line, written as  CODE | Name | Description",
+      fields: [{ key: "text", label: "Rows", multiline: true, placeholder: "MTR | Motor | Drive motors\nBRG | Bearing | Ball and roller" }],
+      onOk: v => {
+        const added = String(v.text || "").split(/[\n;]/).map(l => l.trim()).filter(Boolean).map(l => {
+          const [code, name, note] = l.split("|").map(x => (x || "").trim());
+          return { id: uid("ct"), code: (code || "").toUpperCase(), name: name || "", note: note || "", active: true };
+        }).filter(r => r.code);
+        if (!added.length) return toast("Nothing to add — check the format");
+        c.categories.push(...added); render(); toast(added.length + " row" + (added.length === 1 ? "" : "s") + " added");
+      }
+    });
+    return;
+  }
+  if (act === "cfg-copy") { copyText(JSON.stringify(DB, null, 1), "Configuration copied as JSON"); return; }
+
+  if (act === "conn-set") {
+    const seg = t.segments.find(x => x.id === id);
+    if (seg) { seg.sep = b.dataset.sep === "@inherit" ? null : cleanSep(b.dataset.sep); delete seg.join; render(); }
+    return;
+  }
+  if (act === "sep-set") {
+    t.sep = cleanSep(b.dataset.sep);
+    const inp = $('[data-bind="tpl.sep"]'); if (inp) inp.value = t.sep;
+    save(); refreshPreview(); return;
+  }
+
+  /* company */
+  if (act === "company-add") {
+    modal({
+      title: "New company", confirmText: "Create",
+      fields: [{ key: "name", label: "Company name", placeholder: "Bangkok Parts Ltd." }, { key: "code", label: "Short code", value: "CO" }],
+      onOk: v => {
+        if (!v.name) return toast("A company needs a name");
+        const code = (v.code || "CO").toUpperCase();
+        const nc = { id: uid("co"), name: v.name, code, categories: [], templates: [newTemplate("Main template", code)] };
+        DB.companies.push(nc); DB.activeCo = nc.id; DB.activeTp = nc.templates[0].id; render();
+      }
+    });
+    return;
+  }
+  if (act === "company-rename") {
+    modal({
+      title: "Rename company", confirmText: "Save",
+      fields: [{ key: "name", label: "Company name", value: c.name }, { key: "code", label: "Short code", value: c.code }],
+      onOk: v => { if (v.name) { c.name = v.name; c.code = (v.code || c.code).toUpperCase(); render(); } }
+    });
+    return;
+  }
+  if (act === "company-del") {
+    if (DB.companies.length < 2) return toast("Keep at least one company");
+    modal({
+      title: "Delete company", danger: true, confirmText: "Delete",
+      message: "Removes " + c.name + " and every template it holds. This cannot be undone.",
+      onOk: () => {
+        DB.companies = DB.companies.filter(x => x.id !== c.id);
+        DB.activeCo = DB.companies[0].id; DB.activeTp = (DB.companies[0].templates[0] || {}).id; render();
+      }
+    });
+    return;
+  }
+
+  /* template */
+  if (act === "tpl-pick") { DB.activeTp = id; render(); return; }
+  if (act === "tpl-add") { const nt = newTemplate("New template", c.code); c.templates.push(nt); DB.activeTp = nt.id; render(); return; }
+  if (act === "tpl-dup") {
+    const cp = JSON.parse(JSON.stringify(t));
+    cp.id = uid("tp"); cp.name = t.name + " (copy)";
+    cp.segments.forEach(s => s.id = uid("sg"));
+    c.templates.push(cp); DB.activeTp = cp.id; render(); return;
+  }
+  if (act === "tpl-del") {
+    if (c.templates.length < 2) return toast("Keep at least one template");
+    modal({
+      title: "Delete template", danger: true, confirmText: "Delete",
+      message: "Removes " + t.name + " from " + c.name + ".",
+      onOk: () => { c.templates = c.templates.filter(x => x.id !== t.id); DB.activeTp = c.templates[0].id; render(); }
+    });
+    return;
+  }
+
+  /* segments */
+  if (act === "seg-add") { t.segments.push({ id: uid("sg"), label: "New segment", type: "fixed", sep: null, cfg: defaultCfg("fixed") }); render(); return; }
+  if (act === "seg-del") { t.segments = t.segments.filter(s => s.id !== id); render(); return; }
+  if (act === "seg-up" || act === "seg-down") {
+    const i = t.segments.findIndex(s => s.id === id), j = act === "seg-up" ? i - 1 : i + 1;
+    if (i < 0 || j < 0 || j >= t.segments.length) return;
+    const a = t.segments[i]; t.segments[i] = t.segments[j]; t.segments[j] = a;
+    if (t.segments[0]) { t.segments[0].sep = null; delete t.segments[0].join; }
+    render(); return;
+  }
+});
+
+$("#tabs").addEventListener("click", e => {
+  const b = e.target.closest(".tab"); if (!b) return;
+  DB.tab = b.dataset.tab; render();
+});
+
+DB = load();
+render();
+</script>
+
+</body>
+</html>
